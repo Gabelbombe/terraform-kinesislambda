@@ -1,0 +1,1 @@
+Run deploy.sh
