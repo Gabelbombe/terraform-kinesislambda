@@ -36,12 +36,12 @@ resource "aws_iam_role_policy_attachment" "terraform_lambda_iam_policy_kinesis_e
 
 #<><> Lambda Function <><><><><><><><><><><><><><><><><><><><><><><><><><><><><>#
 resource "aws_lambda_function" "terraform_kinesis_streamer_func" {
-  filename         = "lambda_code.zip"
+  filename         = "payload.zip"
   function_name    = "kinesis_streamer_demo_lambda_function"
   role             = "${aws_iam_role.iam_for_terraform_lambda.arn}"
   handler          = "lib/handler.demoHandler"
-  runtime          = "nodejs4.3"
-  source_code_hash = "${base64sha256(file("lambda_code.zip"))}"
+  runtime          = "python2.7"
+  source_code_hash = "${base64sha256(file("payload.zip"))}"
 }
 
 resource "aws_lambda_event_source_mapping" "kinesis_lambda_event_mapping" {
@@ -55,8 +55,8 @@ resource "aws_lambda_event_source_mapping" "kinesis_lambda_event_mapping" {
 #<><> Kinesis Streams <><><><><><><><><><><><><><><><><><><><><><><><><><><><><>#
 resource "aws_kinesis_stream" "kinesis_streamer_demo_stream" {
   name             = "terraform-kinesis-streamer-demo-stream"
-  shard_count      = 1
-  retention_period = 24
+  shard_count      = 1                                        ## Only single shard needed for demo
+  retention_period = 24                                       ## Retention up to 7 days, https://aws.amazon.com/about-aws/whats-new/2015/10/amazon-kinesis-extended-data-retention/
 
   shard_level_metrics = [
     "IncomingBytes",
@@ -64,6 +64,6 @@ resource "aws_kinesis_stream" "kinesis_streamer_demo_stream" {
   ]
 
   tags {
-    Environment = "terraform-kinesis-streamer-test"
+    Environment = "terraform-kinesis-streamer-test"           ## Vars file will hold envinfo later
   }
 }
