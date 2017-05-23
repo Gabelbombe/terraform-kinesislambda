@@ -1,11 +1,13 @@
 #<><> Provider <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> #
 provider "aws" {
-  region = "${var.aws_region}"
+  access_key = "${var.access_key}"
+  secret_key = "${var.secret_key}"
+  region     = "${var.region}"
 }
 
 #<><> IAM Role <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> #
 resource "aws_iam_role" "iam_for_terraform_lambda" {
-  name = "kinesis_streamer_iam_role"
+  name = "kinesis_streamer_${var.env}_iam_role"
 
   assume_role_policy = <<EOF
 {
@@ -37,7 +39,7 @@ resource "aws_iam_role_policy_attachment" "terraform_lambda_iam_policy_kinesis_e
 #<><> Lambda Function <><><><><><><><><><><><><><><><><><><><><><><><><><><><><>#
 resource "aws_lambda_function" "terraform_kinesis_streamer_func" {
   filename         = "payload.zip"
-  function_name    = "kinesis_streamer_demo_lambda_function"
+  function_name    = "kinesis_streamer_${var.env}_demo_lambda_function"
   role             = "${aws_iam_role.iam_for_terraform_lambda.arn}"
   handler          = "lib/handler.demoHandler"
   runtime          = "python2.7"
@@ -64,6 +66,6 @@ resource "aws_kinesis_stream" "kinesis_streamer_demo_stream" {
   ]
 
   tags {
-    Environment = "terraform-kinesis-streamer-test"           ## Vars file will hold envinfo later
+    Environment = "terraform-kinesis-streamer-${var.env}-test" ## Vars file will hold envinfo later
   }
 }
